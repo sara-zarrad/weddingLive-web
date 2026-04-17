@@ -1,49 +1,63 @@
+import React from 'react';
 import { loginWithGoogle } from "../services/auth";
 import { registerGuestRequest } from "../services/database";
+import { sendAdminNotification } from "../services/notifications";
 
 function Home({ onLogin }) {
-  
   const handleConnect = async () => {
     try {
-      // Étape A : Authentification avec Google
       const user = await loginWithGoogle();
-      
-      // Étape B : Enregistrement dans Firestore (pour le vidéaste)
       await registerGuestRequest(user);
-      
-      // Étape C : Mise à jour de l'état global de l'app
+      await sendAdminNotification(user);
       onLogin(user);
-      
     } catch (error) {
-      if (error.code !== 'auth/cancelled-popup-request') {
-        alert("Erreur lors de la connexion. Vérifie ta connexion internet.");
-      }
+      console.error("Erreur de connexion:", error);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>WeddingLive</h1>
-      <p>Bienvenue ! Connectez-vous pour rejoindre le mariage en direct.</p>
-      
-      <button onClick={handleConnect} style={styles.button}>
-        <img 
-          src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
-          alt="Google" 
-          style={styles.icon} 
-        />
-        Se connecter avec Google
-      </button>
+    <div className="min-h-screen bg-[#fdfcf0] flex flex-col items-center justify-center p-6">
+      {/* Carte principale */}
+      <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl shadow-weddingGold/20 overflow-hidden border border-weddingGold/10">
+        
+        {/* Header avec image ou motif */}
+        <div className="h-48 bg-weddingGold flex items-center justify-center relative">
+          <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')]"></div>
+          <div className="text-white text-center z-10">
+            <span className="text-5xl">💍</span>
+            <h1 className="mt-4 text-2xl font-serif tracking-widest uppercase">WeddingLive</h1>
+          </div>
+        </div>
+
+        {/* Contenu */}
+        <div className="p-10 text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Bienvenue à la célébration</h2>
+          <p className="text-gray-600 mb-8 leading-relaxed">
+            Rejoignez-nous en direct pour partager ce moment inoubliable. 
+            Connectez-vous pour demander votre accès au flux vidéo.
+          </p>
+
+          {/* Bouton Google Stylé */}
+          <button 
+            onClick={handleConnect}
+            className="flex items-center justify-center gap-3 w-full bg-white border-2 border-gray-200 py-3 px-6 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 hover:border-weddingGold transition-all duration-300 group"
+          >
+            <img 
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pwa_google_main_64dp.png" 
+              alt="Google" 
+              className="w-6 h-6"
+            />
+            <span className="group-hover:text-weddingGold">Se connecter avec Google</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Footer décoratif */}
+      <div className="mt-10 text-weddingGold/60 font-serif italic text-lg">
+        " L'amour est la seule aventure qui ne finit jamais "
+      </div>
     </div>
   );
 }
-
-// Petit style rapide pour que ce soit joli
-const styles = {
-  container: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#f9f9f9', fontFamily: 'Arial' },
-  title: { color: '#d4a373', fontSize: '3rem', marginBottom: '20px' },
-  button: { display: 'flex', alignItems: 'center', padding: '10px 20px', fontSize: '16px', cursor: 'pointer', backgroundColor: 'white', border: '1px solid #ddd', borderRadius: '5px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
-  icon: { width: '20px', marginRight: '10px' }
-};
 
 export default Home;
